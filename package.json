@@ -4,7 +4,7 @@
   },
   "dependencies": {
     "@cfworker/json-schema": "4.1.1",
-    "@modelcontextprotocol/sdk": "1.32.1",
+    "@modelcontextprotocol/sdk": "1.32.2",
     "zod": "4.1.12"
   },
   "description": "Deterministic MCP runtime for Workflow Skill Router V2.",
