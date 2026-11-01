@@ -271,3 +271,82 @@ test("success schemas reject invented wrapper fields", () => {
     artifact_kind: "invented",
   }).success, false);
 });
+
+
+test("managed profile route sources are accepted as planning intent", () => {
+  const base = {
+    status: "planned-local-control",
+    workflow_run_id: "workflow:managed",
+    work_graph_id: "work-graph:managed",
+    created_work_items: 1,
+    routing_envelope: "phased",
+    selection_mode: "auto",
+    support_consent_required: false,
+    planned_skill_ids: ["skill:api-designer"],
+    runtime_mode: "mcp-local-control-plane",
+    routing_profile_ids: ["personal:adaptive-memory"],
+    routing_profile_digest: `sha256:${"a".repeat(64)}`,
+    matched_profile_rule_id: "memory-api",
+    planned_skill_tree: [{
+      phase_id: "contract",
+      primary_skill_id: "skill:api-designer",
+      support_skill_ids: [],
+      exit_gate: "contract-reviewed",
+    }],
+    activation_status: "intended-unverified",
+    profile_warnings: [],
+    classification: {
+      source: "profile-route",
+      confidence: "low",
+      classifier_revision: "deterministic-objective-v1",
+      reason_codes: ["single-default"],
+    },
+  };
+  for (const route_source of [
+    "managed-workspace-profile",
+    "managed-personal-profile",
+  ]) {
+    assert.equal(TOOL_OUTPUT_SCHEMAS.plan_work.safeParse({
+      ...base, route_source,
+    }).success, true);
+  }
+});
+
+import memorySamples from "./fixtures/memory-output.json" with { type: "json" };
+
+test("Memory output schemas accept Core fixtures and reject authority/path injection", () => {
+  const schemas = TOOL_OUTPUT_SCHEMAS as Record<string, { safeParse: (value: unknown) => {success: boolean} }>;
+  for (const [name, sample] of Object.entries(memorySamples)) {
+    assert.ok(schemas[name], `${name} output contract missing`);
+    assert.equal(schemas[name].safeParse(sample).success, true, name);
+    for (const field of ["raw_prompt", "workspace_root", "target_path", "runtime_authority"]) {
+      assert.equal(schemas[name].safeParse({ ...sample, [field]: "secret-path" }).success, false, `${name}.${field}`);
+    }
+    assert.equal(schemas[name].safeParse({ ...sample, authority_mode: "verified-host" }).success, false);
+  }
+});
+
+test("Memory outputs reject invented reasons, fake promotion states and invalid Digests", () => {
+  const schemas = TOOL_OUTPUT_SCHEMAS as Record<string, { safeParse: (value: unknown) => {success: boolean} }>;
+  assert.ok(schemas.get_memory_status);
+  assert.equal(schemas.get_memory_status.safeParse({...memorySamples.get_memory_status, reason_codes: ["C:/secret"]}).success, false);
+  assert.equal(schemas.get_memory_status.safeParse({...memorySamples.get_memory_status, actual_skill_consistency: "verified"}).success, false);
+  assert.equal(schemas.transition_profile_update.safeParse({...memorySamples.transition_profile_update, revision_id: null}).success, false);
+  const preview = structuredClone(memorySamples.preview_profile_update);
+  preview.proposal.policy_digest = "sha256:bad";
+  assert.equal(schemas.preview_profile_update.safeParse(preview).success, false);
+});
+
+test("Memory preview validates embedded Profile and Diff contracts, not merely JSON syntax", () => {
+  const schema = TOOL_OUTPUT_SCHEMAS.preview_profile_update;
+  const unknownProfile = structuredClone(memorySamples.preview_profile_update);
+  const profile = JSON.parse(unknownProfile.proposal.proposed_profile_json);
+  profile.raw_prompt = "private input";
+  unknownProfile.proposal.proposed_profile_json = JSON.stringify(profile);
+  assert.equal(schema.safeParse(unknownProfile).success, false);
+  const unknownDiff = structuredClone(memorySamples.preview_profile_update);
+  const diff = JSON.parse(unknownDiff.proposal.semantic_diff_json);
+  diff.entries[0].after = {raw_prompt: "private input"};
+  unknownDiff.proposal.semantic_diff_json = JSON.stringify(diff);
+  assert.equal(schema.safeParse(unknownDiff).success, false);
+});

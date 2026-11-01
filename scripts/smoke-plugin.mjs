@@ -16,7 +16,7 @@ assert.equal(manifest.mcpServers, "./.mcp.json");
 assert.ok(readFileSync(path.join(root, "skills", "workflow-skill-router", "SKILL.md"), "utf8").includes("Workflow Skill Router V2"));
 
 const packageMetadata = JSON.parse(readFileSync(path.join(root, "package.json"), "utf8"));
-assert.equal(packageMetadata.dependencies["@modelcontextprotocol/sdk"], "1.29.0");
+assert.equal(packageMetadata.dependencies["@modelcontextprotocol/sdk"], "1.32.1");
 assert.equal(packageMetadata.dependencies.zod, "4.1.12");
 const mcp = JSON.parse(readFileSync(path.join(root, ".mcp.json"), "utf8"));
 assert.deepEqual(mcp.mcpServers["workflow-skill-router"].args, ["./mcp/server.bundle.mjs"]);
@@ -69,8 +69,8 @@ try {
   const listed = await request(2, "tools/list", {});
   assert.equal(listed.error, undefined, JSON.stringify(listed));
   const names = listed.result.tools.map((tool) => tool.name);
-  assert.equal(new Set(names).size, 12);
-  assert.equal(names.length, 12);
+  assert.equal(new Set(names).size, 20);
+  assert.equal(names.length, 20);
   assert.ok(names.includes("propose_support_consent"));
   assert.ok(names.includes("transition_support_consent"));
   toolCount = names.length;

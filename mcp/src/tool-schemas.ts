@@ -1,11 +1,13 @@
 import { z } from "zod";
+import { MEMORY_INPUT_SHAPES } from "./memory-tool-schemas.js";
+export { MEMORY_INPUT_SCHEMAS } from "./memory-tool-schemas.js";
 
 
 const context = z.object({
   session_id: z.string().min(1).describe("Stable session identifier used to isolate Router state and idempotency."),
   actor: z.string().min(1).describe("Verified user or host actor responsible for this request."),
   runtime_policy_snapshot_id: z.string().min(1).describe("Host policy snapshot governing authority and runtime behavior."),
-}).strict().describe("Authority context supplied by the Codex host.");
+}).strict().describe("Authority context supplied by the host runtime, such as Codex or Claude Code.");
 
 const mutation = {
   context,
@@ -18,6 +20,20 @@ const sha256Fingerprint = z.string().regex(
   "Must be a lowercase SHA-256 fingerprint.",
 );
 const control = { context };
+// 與 Core codec 的六種 observation 對齊，避免模型猜測欄位或混用本機與 Host 證據。
+const workObservation = z.union([
+  z.object({
+    work_item_id: z.string(),
+    transition: z.enum(["start", "submit", "pause", "resume", "fail"]),
+    check_ids: z.array(z.string()),
+    reported_outcome: z.string().nullable(),
+  }).strict().describe("Router-local progress only; check IDs report actual completed checks, never verified Host authority."),
+  z.object({ capability_id: z.string(), activation_receipt_ref: z.string() }).strict(),
+  z.object({ gate_id: z.string(), evidence_kind: z.string(), evidence_receipt_ref: z.string() }).strict(),
+  z.object({ action_digest: z.string(), intent_receipt_ref: z.string() }).strict(),
+  z.object({ intent_id: z.string(), action_digest: z.string(), outcome_receipt_ref: z.string() }).strict(),
+  z.object({ reason_code: z.string(), blocker_ref: z.string() }).strict(),
+]).describe("Exactly one Core observation shape. Native receipt-bearing shapes still require verified Host authority; a valid payload does not grant it.");
 const agentSnapshot = z.object({
   schema_id: z.string().describe("Registered schema identifier for the agent runtime snapshot."),
   schema_version: z.string().describe("Version of the registered runtime snapshot schema."),
@@ -36,7 +52,7 @@ const routingIdentifiers = z.array(routingIdentifier).max(32)
   .refine((values) => new Set(values).size === values.length, "Routing identifiers must be unique.");
 const routingContext = z.object({
   workspace_root: z.string().min(1).nullable().describe(
-    "Workspace root whose fixed .codex/workflow-skill-router.json may be loaded after MCP Client-root or operator-root authorization.",
+    "Workspace root whose fixed host profile may be loaded after MCP Client-root or operator-root authorization: .codex/workflow-skill-router.json for Codex, or .claude/ before .codex/ for Claude Code.",
   ),
   domains: routingIdentifiers.describe("Deterministic domain identifiers used by profile matchers."),
   tags: routingIdentifiers.describe("Deterministic task tags used by profile matchers."),
@@ -52,7 +68,7 @@ export const PLAN_WORK_INPUT_SCHEMA = z.object({
   explicit_skill_ids: z.array(z.string()).describe("Skill IDs explicitly selected by the user and protected by Explicit Skill Lock; an empty array allows automatic planning without proving activation."),
   explicit_semantics: z.enum(["use", "only", "all"]).nullable().describe("How explicit Skill IDs constrain routing; null when no explicit lock exists."),
   routing_context: routingContext.optional().describe(
-    "Context for an optional deterministic Profile match. Omission preserves the V2 request contract; these values grant no runtime or deployment authority.",
+    "Context for an optional deterministic Profile match. Omission preserves the V2 beta.1 request contract; these values grant no runtime or deployment authority.",
   ),
 }).strict().superRefine((value, context) => {
   if (value.explicit_skill_ids.length === 0 && value.explicit_semantics !== null) {
@@ -65,6 +81,7 @@ export const PLAN_WORK_INPUT_SCHEMA = z.object({
 });
 
 export const TOOL_INPUT_SHAPES = {
+  ...MEMORY_INPUT_SHAPES,
   sync_runtime_context: z.object({
     ...mutation,
     intent: z.object({
@@ -109,7 +126,7 @@ export const TOOL_INPUT_SHAPES = {
     ...mutation,
     workflow_run_id: z.string().min(1).describe("Workflow run receiving the semantic observation."),
     phase_id: z.string().min(1).describe("Phase receiving the semantic observation."),
-    observation: z.record(z.string(), z.unknown()).describe("Versioned work observation validated by the core codec."),
+    observation: workObservation,
     activation_receipt_ref: z.string().nullable().describe("Single-use activation receipt when the observation reports execution."),
   }).strict().shape,
   evaluate_gate: z.object({
@@ -117,7 +134,7 @@ export const TOOL_INPUT_SHAPES = {
     workflow_run_id: z.string().min(1).describe("Workflow run whose phase gate is evaluated."),
     phase_id: z.string().min(1).describe("Phase whose exit gate is evaluated."),
     expected_plan_revision: z.number().int().nonnegative().describe("Plan revision bound to this gate decision."),
-    expected_evidence_digest: z.string().min(1).describe("Evidence digest expected before evaluating mandatory checks."),
+    expected_evidence_digest: z.string().min(1).describe("Evidence digest expected before evaluating mandatory checks. For router-local work, use sha256: plus the SHA-256 of compact UTF-8 JSON with sorted keys: {\"evidence_class\":\"user-or-agent-reported-local\",\"persisted_check_ids\":[...sorted persisted check IDs...]}. Check IDs come from the matched Profile phase exit_gate, or router-local-single-completed for profile-less Single work. Do not invent evidence or substitute a command-output hash."),
     evidence_refs: z.array(z.string()).describe("Content-addressed evidence references considered by the gate."),
   }).strict().shape,
   get_router_status: z.object({

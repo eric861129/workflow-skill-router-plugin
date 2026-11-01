@@ -1,5 +1,9 @@
-# Terms of Use
+# Terms
 
-Workflow Skill Router is provided under the [MIT License](LICENSE).
+Workflow Skill Router is provided under the MIT License in `LICENSE`.
+Third-party components remain subject to their respective licenses as listed in
+`THIRD_PARTY_NOTICES.md` and the dependency lockfile.
 
-It helps plan and disclose Skill usage; it does not grant permissions, approve deployments, or replace Host sandboxing, review, or organizational security controls. You remain responsible for reviewing actions and complying with the policies that apply to your environment.
+The software is provided without warranty. Users remain responsible for
+reviewing selected Skills, tool permissions, approval policies, and generated
+work before applying changes.

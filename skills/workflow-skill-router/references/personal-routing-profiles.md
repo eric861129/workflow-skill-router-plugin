@@ -30,7 +30,7 @@ python plugins/workflow-skill-router/runtime/workflow_skill_router.pyz profile p
 python plugins/workflow-skill-router/runtime/workflow_skill_router.pyz profile lint .\my-profile.json
 ```
 
-安裝包含本功能的正式 Plugin 後，可在 Plugin 目錄改用 `python runtime/workflow_skill_router.pyz profile ...`。只有另外安裝 Router Core 的 Python console script 時，才會有 `workflow-skill-router profile ...` 簡寫。
+安裝包含本功能的 prerelease 後，可在 Plugin 目錄改用 `python runtime/workflow_skill_router.pyz profile ...`。只有另外安裝 Router Core 的 Python console script 時，才會有 `workflow-skill-router profile ...` 簡寫。
 
 呼叫 `plan_work` 時，若要啟用 workspace Profile 或 matcher，提供 optional `routing_context`：`workspace_root`、`domains`、`tags`、`current_phase_id`。舊版呼叫可省略此欄位，仍保持相容。
 

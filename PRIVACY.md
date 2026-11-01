@@ -1,7 +1,10 @@
-# Privacy Notice
+# Privacy
 
-Workflow Skill Router runs locally. It does not send telemetry, routing plans, consent records, profile data, or local state to a remote service by default.
+Workflow Skill Router runs locally and does not add analytics, advertising, or
+telemetry. Its bundled MCP server stores routing state in the user data
+directory selected by the host or by `WORKFLOW_SKILL_ROUTER_DATA_DIR`; it does
+not store that state inside the Plugin installation.
 
-The Router stores its local SQLite state outside the Plugin cache. You control the location with `WORKFLOW_SKILL_ROUTER_DATA_DIR`.
-
-The MCP Client, installed Skills, configured Host integrations, and any commands you run may have their own data-handling policies. Review those policies before using them with Router-managed work.
+Prompts, repository content, and tool results remain subject to the privacy
+terms of Codex and any tools the user independently enables. This Plugin does
+not grant those tools additional access.

@@ -6,24 +6,24 @@ const root = path.resolve(import.meta.dirname, "..");
 const tests = process.argv.includes("--tests");
 const outputIndex = process.argv.indexOf("--output");
 const explicitOutput = outputIndex === -1 ? null : process.argv[outputIndex + 1];
+const sdkServerIndex = path.join(
+  root,
+  "node_modules",
+  "@modelcontextprotocol",
+  "sdk",
+  "dist",
+  "esm",
+  "server",
+  "index.js",
+);
+const cfWorkerProvider = path.join(root, "mcp", "src", "cfworker-json-schema-provider.ts");
 if (outputIndex !== -1 && !explicitOutput) throw new Error("--output requires a path");
 if (tests && explicitOutput) throw new Error("--output cannot be combined with --tests");
-const cfworkerJsonSchemaProvider = path.join(root, "mcp", "src", "cfworker-json-schema-provider.ts");
-const secureJsonSchemaProvider = {
-  name: "secure-json-schema-provider",
-  setup(buildContext) {
-    buildContext.onResolve({ filter: /ajv-provider\.js$/ }, (args) => {
-      const importer = args.importer.replaceAll("\\", "/");
-      if (importer.endsWith("/@modelcontextprotocol/sdk/dist/esm/server/index.js")) {
-        return { path: cfworkerJsonSchemaProvider };
-      }
-      return undefined;
-    });
-  },
-};
 const testSources = [
   ["bundled-runtime", "ts"],
+  ["memory-runtime", "ts"],
   ["core-client", "ts"],
+  ["host", "ts"],
   ["python-discovery", "ts"],
   ["runtime-readiness", "ts"],
   ["runtime-output-validation", "ts"],
@@ -47,12 +47,18 @@ for (const entry of entries) {
     format: "esm",
     target: "node24",
     bundle: true,
+    // SDK Client transport uses cross-spawn; keep that test-only dependency
+    // in its native Node module format instead of bundling CommonJS into ESM.
+    external: entry.in.endsWith("memory-runtime.test.ts") ? ["@modelcontextprotocol/sdk/*"] : [],
     sourcemap: false,
     logLevel: "warning",
-    plugins: [secureJsonSchemaProvider],
+    plugins: [{
+      name: "replace-mcp-sdk-ajv-provider",
+      setup(buildContext) {
+        buildContext.onResolve({ filter: /ajv-provider\.js$/ }, (args) => (
+          args.importer === sdkServerIndex ? { path: cfWorkerProvider } : undefined
+        ));
+      },
+    }],
   });
-  if (!tests) {
-    const bundle = fs.readFileSync(entry.out, "utf8").replace(/[ \t]+$/gm, "");
-    fs.writeFileSync(entry.out, bundle, "utf8");
-  }
 }

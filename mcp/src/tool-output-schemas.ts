@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { MEMORY_OUTPUT_SCHEMAS } from "./memory-tool-schemas.js";
 
 
 const nullableIdentifier = z.string().nullable();
@@ -170,6 +171,7 @@ const gateEvaluation = z.object({
 });
 
 export const TOOL_OUTPUT_SCHEMAS = {
+  ...MEMORY_OUTPUT_SCHEMAS,
   sync_runtime_context: z.object({
     snapshot: unknownObject,
     drift: z.array(unknownObject),
@@ -190,7 +192,8 @@ export const TOOL_OUTPUT_SCHEMAS = {
     ),
     runtime_mode: z.string(),
     route_source: z.enum([
-      "user-explicit", "workspace-profile", "personal-profile", "builtin-default",
+      "user-explicit", "workspace-profile", "managed-workspace-profile",
+      "personal-profile", "managed-personal-profile", "builtin-default",
     ]).describe("Source of planned Skill intent, distinct from work-envelope classification."),
     routing_profile_ids: z.array(z.string()),
     routing_profile_digest: sha256Digest.nullable(),
