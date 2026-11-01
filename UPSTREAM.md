@@ -1,10 +1,10 @@
 # Upstream provenance
 
 This repository is a generated, standalone distribution of Workflow Skill
-Router Plugin version `2.1.0`.
+Router Plugin version `2.1.1`.
 
 - Canonical repository: https://github.com/eric861129/Workflow-skill-router
-- Canonical source revision: `a347482b3b53011b79eaf8b71071b79f9ea564a6`
+- Canonical source revision: `f4d7eb53f9da1e346a8d257e7ac5dfbc5e7d3147`
 - Distribution repository: https://github.com/eric861129/workflow-skill-router-plugin
 
 Changes to runtime code, tests, the Skill, or bundled assets must originate in

@@ -37,5 +37,5 @@
   "name": "workflow-skill-router",
   "repository": "https://github.com/eric861129/workflow-skill-router-plugin",
   "skills": "./skills/",
-  "version": "2.1.0"
+  "version": "2.1.1"
 }

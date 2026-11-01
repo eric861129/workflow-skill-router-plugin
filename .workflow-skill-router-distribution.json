@@ -63,6 +63,6 @@
     "skills/workflow-skill-router/references/routing-protocol.md"
   ],
   "schema_version": "1.0",
-  "source_revision": "a347482b3b53011b79eaf8b71071b79f9ea564a6",
-  "version": "2.1.0"
+  "source_revision": "f4d7eb53f9da1e346a8d257e7ac5dfbc5e7d3147",
+  "version": "2.1.1"
 }

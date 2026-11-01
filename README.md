@@ -12,8 +12,8 @@ classifies work as Single, Phased, or Managed Goal work, discovers the
 available capabilities, and selects the smallest sufficient Skill set without
 replacing runtime permissions, approval policies, or tool access controls.
 
-This standalone repository contains Plugin version `2.1.0`, generated
-from canonical source revision `a347482b3b53011b79eaf8b71071b79f9ea564a6`.
+This standalone repository contains Plugin version `2.1.1`, generated
+from canonical source revision `f4d7eb53f9da1e346a8d257e7ac5dfbc5e7d3147`.
 
 [![HOL Plugin Scanner](https://github.com/eric861129/workflow-skill-router-plugin/actions/workflows/hol-plugin-scanner.yml/badge.svg?branch=main)](https://github.com/eric861129/workflow-skill-router-plugin/actions/workflows/hol-plugin-scanner.yml)
 
@@ -22,7 +22,7 @@ from canonical source revision `a347482b3b53011b79eaf8b71071b79f9ea564a6`.
 Install the immutable release tag rather than the moving `main` branch:
 
 ```powershell
-codex plugin marketplace add eric861129/workflow-skill-router-plugin --ref v2.1.0
+codex plugin marketplace add eric861129/workflow-skill-router-plugin --ref v2.1.1
 codex plugin add workflow-skill-router@workflow-skill-router-plugin
 codex plugin list
 ```
