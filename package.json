@@ -31,5 +31,5 @@
     "test": "node ./scripts/build-mcp.mjs --tests && node --test ./.test-build/*.test.mjs"
   },
   "type": "module",
-  "version": "2.1.1"
+  "version": "2.1.2"
 }

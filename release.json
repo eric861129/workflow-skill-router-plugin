@@ -1,7 +1,7 @@
 {
   "canonical_repository": "https://github.com/eric861129/Workflow-skill-router",
   "channel": "latest",
-  "source_revision": "f4d7eb53f9da1e346a8d257e7ac5dfbc5e7d3147",
+  "source_revision": "7c22f70c346cd8cef4d689ea9391c164c4c8b95f",
   "target_repository": "https://github.com/eric861129/workflow-skill-router-plugin",
-  "version": "2.1.1"
+  "version": "2.1.2"
 }
