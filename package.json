@@ -3,7 +3,7 @@
     "url": "https://github.com/eric861129/workflow-skill-router-plugin/issues"
   },
   "dependencies": {
-    "@cfworker/json-schema": "4.1.1",
+    "@cfworker/json-schema": "4.1.4",
     "@modelcontextprotocol/sdk": "1.32.2",
     "zod": "4.6.7"
   },
