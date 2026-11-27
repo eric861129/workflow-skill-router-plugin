@@ -10,7 +10,7 @@
   "description": "Deterministic MCP runtime for Workflow Skill Router V2.",
   "devDependencies": {
     "esbuild": "0.28.2",
-    "fast-check": "4.10.2"
+    "fast-check": "4.11.0"
   },
   "engines": {
     "node": ">=24"
